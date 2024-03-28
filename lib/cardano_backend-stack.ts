@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import {HttpLambdaIntegration} from 'aws-cdk-lib/aws-apigatewayv2-integrations'
+import {PayloadFormatVersion} from "aws-cdk-lib/aws-apigatewayv2";
 
 export class CardanoBackendStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -19,7 +20,8 @@ export class CardanoBackendStack extends Stack {
     const httpApi = new apigatewayv2.HttpApi(this, 'CardanoApi');
     const lambdaIntegration = new HttpLambdaIntegration(
         'LambdaIntegration',
-        lambda_backend
+        lambda_backend,
+        { payloadFormatVersion: PayloadFormatVersion.VERSION_2_0}
     );
 
     httpApi.addRoutes({

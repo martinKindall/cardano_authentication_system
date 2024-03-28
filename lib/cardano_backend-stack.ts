@@ -10,8 +10,8 @@ export class CardanoBackendStack extends Stack {
 
     const lambda_backend = new lambda.Function(this, 'readLambdaHandler', {
       runtime: lambda.Runtime.JAVA_21,
-      code: lambda.Code.fromAsset("./lambda/build/libs/app-1.0-SNAPSHOT-all.jar"),
-      handler: "com.codigomorsa.app.Cardano::onEvent",
+      code: lambda.Code.fromAsset("./lambda/target/app.jar"),
+      handler: "com.walruscode.cardano.App::onEvent",
       memorySize: 1024,
       timeout: Duration.seconds(10)
     });

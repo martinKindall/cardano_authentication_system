@@ -11,35 +11,54 @@ public class App {
 
     private static final Gson gson = new Gson();
 
-    public Map<String, Object> onEvent(Map<String, Object> request) {
-        Optional<Payload> payload = getParams(request);
+    public Map<String, Object> login(Map<String, Object> request) {
+        PayloadCookie payloadCookie = getDecryptedCookie(request);
 
-        if (payload.isEmpty()) return Map.of("statusCode",400);
-
-        Optional<String> cookie = getCookie(request);
-
-        if (cookie.isEmpty()) {
-            // generate nonce and save it to DB, referencing the stake address
-            saveNonceAndAddress(payload.get().stakeAddress(), "somerandomnonce");
-
-            // trigger authentication logic
-            return Map.of("statusCode",200, "body","Needs authentication");
+        if (payloadCookie.payload().isEmpty()) {
+            return Map.of("statusCode",400);
         }
 
-        System.out.println("Incoming cookie: " + cookie);
+        if (payloadCookie.cookie().isEmpty()) {
+            // generate nonce and save it to DB, referencing the stake address
+            saveNonceAndAddress(payloadCookie.payload().get().stakeAddress(), "somerandomnonce");
 
-        boolean isValidCookie = validateCookie(cookie.get(), payload.get().stakeAddress());
+            // trigger authentication logic
+            return Map.of("statusCode",200, "body","Needs SignData");
+        }
 
-        if (!isValidCookie) {
-            // trigger clear cookie and redirect to login
+        return Map.of("statusCode",200, "body","Redirect to showContent");
+    }
+
+    public Map<String, Object> showContent(Map<String, Object> request) {
+        PayloadCookie payloadCookie = getDecryptedCookie(request);
+
+        if (payloadCookie.payload().isEmpty()) {
+            return Map.of("statusCode",400);
+        }
+
+        if (payloadCookie.cookie().isEmpty()) {
             return Map.of("statusCode",200, "body","Redirect to login and clear cookie");
         }
 
         return Map.of("statusCode",200,"body","Foo bar",
-                "headers", Map.of("Set-Cookie", cookie.get()));
+                "headers", Map.of("Set-Cookie", payloadCookie.cookie().get()));
     }
 
-    private boolean validateCookie(String cookie, String stakeAddress) { return false; }
+    private PayloadCookie getDecryptedCookie(Map<String, Object> request) {
+        Optional<Payload> payload = getParams(request);
+
+        if (payload.isEmpty()) return new PayloadCookie(Optional.empty(), Optional.empty());
+
+        Optional<String> cookie = getCookie(request);
+
+        if (cookie.isEmpty()) return new PayloadCookie(payload, Optional.empty());
+
+        return new PayloadCookie(payload, validateCookie(cookie.get(), payload.get().stakeAddress()));
+    }
+
+    private Optional<String> validateCookie(String cookie, String stakeAddress) {
+        return Optional.of(cookie);
+    }
 
     private void saveNonceAndAddress(String stakeAddress, String somerandomnonce) {}
 
@@ -58,4 +77,6 @@ public class App {
 
         return Optional.of(cookies.getFirst());
     }
+
+    private static record PayloadCookie(Optional<Payload> payload, Optional<String> cookie) {}
 }

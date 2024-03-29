@@ -9,7 +9,11 @@ import java.util.Optional;
 
 public class App {
 
-    private static final Gson gson = new Gson();
+    private final Gson gson;
+
+    public App(Gson gson) {
+        this.gson = gson;
+    }
 
     public Map<String, Object> login(Map<String, Object> request) {
         PayloadCookie payloadCookie = getDecryptedCookie(request);
@@ -56,8 +60,8 @@ public class App {
         return new PayloadCookie(payload, validateCookie(cookie.get(), payload.get().stakeAddress()));
     }
 
-    private Optional<String> validateCookie(String cookie, String stakeAddress) {
-        return Optional.of(cookie);
+    private Optional<String> validateCookie(String encryptedCookie, String stakeAddress) {
+        return Optional.of(encryptedCookie);
     }
 
     private void saveNonceAndAddress(String stakeAddress, String somerandomnonce) {}

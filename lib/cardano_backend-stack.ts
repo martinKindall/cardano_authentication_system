@@ -12,7 +12,7 @@ export class CardanoBackendStack extends Stack {
     const lambda_backend = new lambda.Function(this, 'readLambdaHandler', {
       runtime: lambda.Runtime.JAVA_21,
       code: lambda.Code.fromAsset("./lambda/target/app.jar"),
-      handler: "com.walruscode.cardano.App::showContent",
+      handler: "com.walruscode.cardano.Router::showContent",
       memorySize: 1024,
       timeout: Duration.seconds(10)
     });

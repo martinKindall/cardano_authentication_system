@@ -2,6 +2,7 @@ package com.walruscode.cardano;
 
 import com.google.gson.Gson;
 import com.walruscode.cardano.dto.Payload;
+import com.walruscode.cardano.dto.SignPayload;
 
 import java.util.List;
 import java.util.Map;
@@ -15,22 +16,33 @@ public class App {
         this.gson = gson;
     }
 
-    public Map<String, Object> login(Map<String, Object> request) {
-        PayloadCookie payloadCookie = getDecryptedCookie(request);
+    public Map<String, Object> getAndSaveNonce(Map<String, Object> request) {
+        Optional<Payload> payload = getPayloadParams(request);
 
-        if (payloadCookie.payload().isEmpty()) {
+        if (payload.isEmpty()) {
             return Map.of("statusCode",400);
         }
 
-        if (payloadCookie.cookie().isEmpty()) {
-            // generate nonce and save it to DB, referencing the stake address
-            saveNonceAndAddress(payloadCookie.payload().get().stakeAddress(), "somerandomnonce");
+        String nonce = "somerandomnonce";
 
-            // trigger authentication logic
-            return Map.of("statusCode",200, "body","Needs SignData");
-        }
+        saveNonceAndAddress(payload.get().stakeAddress(), nonce);
 
-        return Map.of("statusCode",200, "body","Redirect to showContent");
+        return Map.of("statusCode",200, "body","Needs SignData: " + nonce);
+    }
+
+    public Map<String, Object> validateSign(Map<String, Object> request) {
+        Optional<SignPayload> signPayload = getSignPayloadParams(request);
+
+        if (signPayload.isEmpty()) return Map.of("statusCode",400);
+
+        // validate sign
+
+        // verify address and nonce with database
+
+        // create cookie with data if 2 previous steps are correct
+
+        return Map.of("statusCode",200, "body","Signature validated, redirect to showContent",
+                "headers", Map.of("Set-Cookie", "the-cookie"));
     }
 
     public Map<String, Object> showContent(Map<String, Object> request) {
@@ -49,7 +61,7 @@ public class App {
     }
 
     private PayloadCookie getDecryptedCookie(Map<String, Object> request) {
-        Optional<Payload> payload = getParams(request);
+        Optional<Payload> payload = getPayloadParams(request);
 
         if (payload.isEmpty()) return new PayloadCookie(Optional.empty(), Optional.empty());
 
@@ -66,12 +78,20 @@ public class App {
 
     private void saveNonceAndAddress(String stakeAddress, String somerandomnonce) {}
 
-    private Optional<Payload> getParams(Map<String, Object> request) {
+    private Optional<Payload> getPayloadParams(Map<String, Object> request) {
         String body = (String) request.get("body");
 
         if (body == null) return Optional.empty();
 
         return Optional.of(gson.fromJson(body, Payload.class));
+    }
+
+    private Optional<SignPayload> getSignPayloadParams(Map<String, Object> request) {
+        String body = (String) request.get("body");
+
+        if (body == null) return Optional.empty();
+
+        return Optional.of(gson.fromJson(body, SignPayload.class));
     }
 
     private Optional<String> getCookie(Map<String, Object> request) {

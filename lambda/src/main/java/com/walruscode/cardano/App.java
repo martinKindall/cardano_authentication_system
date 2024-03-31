@@ -61,8 +61,7 @@ public class App {
             return Map.of("statusCode",200, "body","Redirect to login and clear cookie");
         }
 
-        return Map.of("statusCode",200,"body","Foo bar",
-                "headers", Map.of("Set-Cookie", payloadCookie.cookie().get()));
+        return Map.of("statusCode",200,"body","Foo bar");
     }
 
     private PayloadCookie getDecryptedCookie(Map<String, Object> request) {
@@ -111,5 +110,5 @@ public class App {
         return Optional.of(cookies.getFirst());
     }
 
-    private static record PayloadCookie(Optional<Payload> payload, Optional<String> cookie) {}
+    private record PayloadCookie(Optional<Payload> payload, Optional<String> cookie) {}
 }

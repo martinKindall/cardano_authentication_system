@@ -15,4 +15,8 @@ public class Router {
     public Map<String, Object> showContent(Map<String, Object> request) {
         return app.showContent(request);
     }
+
+    public Map<String, Object> validateSign(Map<String, Object> request) {
+        return app.validateSign(request);
+    }
 }

@@ -11,14 +11,19 @@ public class Cip30Service {
 
     public Optional<Cip30Result> verify(String key, String sign) {
         var verifier = new CIP30Verifier(sign, key);
-        var result = verifier.verify();
 
-        return result.isValid() ? Optional.of(new Cip30Result(
-                result.getMessage(MessageFormat.TEXT),
-                result.getAddress(AddressFormat.TEXT).orElseThrow())) : Optional.empty();
+        try {
+            var result = verifier.verify();
+
+            return result.isValid() ? Optional.of(new Cip30Result(
+                    result.getMessage(MessageFormat.TEXT),
+                    result.getAddress(AddressFormat.TEXT).orElseThrow())) : Optional.empty();
+        } catch (RuntimeException e) {
+            return Optional.empty();
+        }
     }
 
-    public static record Cip30Result(String message, String stakeAddress) {
+    public record Cip30Result(String message, String stakeAddress) {
 
         public Cip30Result {
             Objects.requireNonNull(message);

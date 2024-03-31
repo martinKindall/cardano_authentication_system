@@ -1,9 +1,9 @@
 package com.walruscode.cardano;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.walruscode.cardano.dto.Payload;
 import com.walruscode.cardano.dto.SignPayload;
+import com.walruscode.cardano.services.Cip30Service;
 
 import java.util.List;
 import java.util.Map;
@@ -12,9 +12,11 @@ import java.util.Optional;
 public class App {
 
     private final Gson gson;
+    private final Cip30Service cip30Service;
 
-    public App(Gson gson) {
+    public App(Gson gson, Cip30Service cip30Service) {
         this.gson = gson;
+        this.cip30Service = cip30Service;
     }
 
     public Map<String, Object> getAndSaveNonce(Map<String, Object> request) {
@@ -36,7 +38,9 @@ public class App {
 
         if (signPayload.isEmpty()) return Map.of("statusCode",400);
 
-        // validate sign
+        var result = cip30Service.verify(signPayload.get().key(), signPayload.get().sign());
+
+        if (result.isEmpty()) return Map.of("statusCode",400);
 
         // verify address and nonce with database
 

@@ -20,11 +20,22 @@
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.cardanofoundation</groupId>
+            <artifactId>cip30-data-signature-parser</artifactId>
+            <version>0.0.11</version>
+        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.11.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

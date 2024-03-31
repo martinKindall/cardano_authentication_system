@@ -1,9 +1,12 @@
 package com.walruscode.cardano;
 
+import com.google.gson.Gson;
+import com.walruscode.cardano.dto.SignPayload;
 import com.walruscode.cardano.services.EncryptionService;
 import org.junit.jupiter.api.Test;
 
 import java.security.SecureRandom;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -1,6 +1,7 @@
 package com.walruscode.cardano;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.walruscode.cardano.dto.Payload;
 import com.walruscode.cardano.dto.SignPayload;
 
@@ -91,7 +92,11 @@ public class App {
 
         if (body == null) return Optional.empty();
 
-        return Optional.of(gson.fromJson(body, SignPayload.class));
+        try {
+            return Optional.of(gson.fromJson(body, SignPayload.class));
+        } catch (RuntimeException e) {
+            return Optional.empty();
+        }
     }
 
     private Optional<String> getCookie(Map<String, Object> request) {

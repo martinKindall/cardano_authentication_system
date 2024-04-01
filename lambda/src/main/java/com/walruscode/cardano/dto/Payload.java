@@ -1,3 +1,10 @@
 package com.walruscode.cardano.dto;
 
-public record Payload(String stakeAddress) {}
+import java.util.Objects;
+
+public record Payload(String stakeAddress) {
+
+    public Payload {
+        Objects.requireNonNull(stakeAddress);
+    }
+}

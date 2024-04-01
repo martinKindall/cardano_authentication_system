@@ -95,4 +95,38 @@ public class AppTest {
 
         Assertions.assertEquals(address.getValue(), "asadwqeqe1321");
     }
+
+    @Test
+    public void getNonceTestInvalid() throws Exception {
+        Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result("key", "sign")))
+                .when(cip30Service).verify(anyString(), anyString());
+
+        final App app = new App(new Gson(), cip30Service, walletRepository);
+
+        String body = "{\"stakeAddress2\": \"asadwqeqe1321\"}";
+
+        Map<String, Object> response = app.getAndSaveNonce(Map.of("body", body));
+
+        Assertions.assertEquals(response.get("statusCode"), 400);
+
+        Mockito.verify(walletRepository, Mockito.times(0))
+                .saveWallet(anyString(), anyString(), any());
+    }
+
+    @Test
+    public void getNonceTestInvalidBody() throws Exception {
+        Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result("key", "sign")))
+                .when(cip30Service).verify(anyString(), anyString());
+
+        final App app = new App(new Gson(), cip30Service, walletRepository);
+
+        String body = "notajsonbody";
+
+        Map<String, Object> response = app.getAndSaveNonce(Map.of("body", body));
+
+        Assertions.assertEquals(response.get("statusCode"), 400);
+
+        Mockito.verify(walletRepository, Mockito.times(0))
+                .saveWallet(anyString(), anyString(), any());
+    }
 }

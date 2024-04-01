@@ -98,7 +98,11 @@ public class App {
 
         if (body == null) return Optional.empty();
 
-        return Optional.of(gson.fromJson(body, Payload.class));
+        try {
+            return Optional.of(gson.fromJson(body, Payload.class));
+        } catch (RuntimeException e) {
+            return Optional.empty();
+        }
     }
 
     private Optional<SignPayload> getSignPayloadParams(Map<String, Object> request) {

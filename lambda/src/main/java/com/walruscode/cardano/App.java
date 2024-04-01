@@ -8,6 +8,7 @@ import com.walruscode.cardano.services.Cip30Service;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 public class App {
 
@@ -26,7 +27,7 @@ public class App {
             return Map.of("statusCode",400);
         }
 
-        String nonce = "somerandomnonce";
+        String nonce = generateRandomString();
 
         saveNonceAndAddress(payload.get().stakeAddress(), nonce);
 
@@ -117,4 +118,17 @@ public class App {
     }
 
     private record PayloadCookie(Optional<Payload> payload, Optional<String> cookie) {}
+
+    private static String generateRandomString() {
+        int leftLimit = 48;   // numeral '0'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 10;
+        Random random = new Random();
+
+        return random.ints(leftLimit, rightLimit + 1)
+                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+                .limit(targetStringLength)
+                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+    }
 }

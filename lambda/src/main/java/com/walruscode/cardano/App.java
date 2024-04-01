@@ -3,8 +3,10 @@ package com.walruscode.cardano;
 import com.google.gson.Gson;
 import com.walruscode.cardano.dto.Payload;
 import com.walruscode.cardano.dto.SignPayload;
+import com.walruscode.cardano.repositories.WalletRepository;
 import com.walruscode.cardano.services.Cip30Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,10 +16,12 @@ public class App {
 
     private final Gson gson;
     private final Cip30Service cip30Service;
+    private final WalletRepository walletRepository;
 
-    public App(Gson gson, Cip30Service cip30Service) {
+    public App(Gson gson, Cip30Service cip30Service, WalletRepository walletRepository) {
         this.gson = gson;
         this.cip30Service = cip30Service;
+        this.walletRepository = walletRepository;
     }
 
     public Map<String, Object> getAndSaveNonce(Map<String, Object> request) {
@@ -29,7 +33,7 @@ public class App {
 
         String nonce = generateRandomString();
 
-        saveNonceAndAddress(payload.get().stakeAddress(), nonce);
+        walletRepository.saveWallet(payload.get().stakeAddress(), nonce, Instant.now());
 
         return Map.of("statusCode",200, "body","Needs SignData: " + nonce);
     }

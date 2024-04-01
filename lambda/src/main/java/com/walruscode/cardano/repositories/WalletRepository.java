@@ -13,6 +13,7 @@ import java.time.Instant;
 
 public class WalletRepository implements AutoCloseable {
 
+    private final String TABLE_NAME = "wallet";
     private final DynamoDbClient client;
     private final DynamoDbEnhancedClient dbClient;
     private final DynamoDbTable<Wallet> table;
@@ -30,7 +31,7 @@ public class WalletRepository implements AutoCloseable {
                 .dynamoDbClient(client)
                 .build();
 
-        table = dbClient.table("wallet", TableSchema.fromBean(Wallet.class));
+        table = dbClient.table(TABLE_NAME, TableSchema.fromBean(Wallet.class));
     }
 
     public void saveWallet(String stakeAddress, String nonce, Instant instant) {

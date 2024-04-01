@@ -22,7 +22,7 @@ public class AppTest {
     }
 
     @Test
-    public void validateSignTest() {
+    public void validateSignTest() throws Exception {
         Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result("key", "sign")))
                 .when(cip30Service).verify(anyString(), anyString());
 
@@ -51,6 +51,19 @@ public class AppTest {
         final App app = new App(new Gson(), cip30Service);
 
         String body = "notajsonstring";
+
+        Map<String, Object> response = app.validateSign(Map.of("body", body));
+
+        Assertions.assertEquals(response.get("statusCode"), 400);
+    }
+
+    @Test
+    public void validateSignTestCip30Fails() throws Exception {
+        Mockito.doThrow(new RuntimeException()).when(cip30Service).verify(anyString(), anyString());
+
+        final App app = new App(new Gson(), cip30Service);
+
+        String body = "{\"sign\": \"asdasdsd\", \"key\": \"assadad\", \"stakeAddress\": \"asadwqeqe1321\"}";
 
         Map<String, Object> response = app.validateSign(Map.of("body", body));
 

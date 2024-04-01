@@ -9,18 +9,14 @@ import java.util.Optional;
 
 public class Cip30Service {
 
-    public Optional<Cip30Result> verify(String key, String sign) {
+    public Optional<Cip30Result> verify(String key, String sign) throws Exception {
         var verifier = new CIP30Verifier(sign, key);
 
-        try {
-            var result = verifier.verify();
+        var result = verifier.verify();
 
-            return result.isValid() ? Optional.of(new Cip30Result(
-                    result.getMessage(MessageFormat.TEXT),
-                    result.getAddress(AddressFormat.TEXT).orElseThrow())) : Optional.empty();
-        } catch (RuntimeException e) {
-            return Optional.empty();
-        }
+        return result.isValid() ? Optional.of(new Cip30Result(
+                result.getMessage(MessageFormat.TEXT),
+                result.getAddress(AddressFormat.TEXT).orElseThrow())) : Optional.empty();
     }
 
     public record Cip30Result(String message, String stakeAddress) {

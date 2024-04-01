@@ -38,7 +38,13 @@ public class App {
 
         if (signPayload.isEmpty()) return Map.of("statusCode",400);
 
-        var result = cip30Service.verify(signPayload.get().key(), signPayload.get().sign());
+        Optional<Cip30Service.Cip30Result> result;
+
+        try {
+            result = cip30Service.verify(signPayload.get().key(), signPayload.get().sign());
+        } catch (Exception e) {
+            result = Optional.empty();
+        }
 
         if (result.isEmpty()) return Map.of("statusCode",400);
 

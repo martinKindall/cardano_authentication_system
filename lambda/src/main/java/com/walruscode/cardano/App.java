@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.walruscode.cardano.dto.Payload;
 import com.walruscode.cardano.dto.SignPayload;
 import com.walruscode.cardano.services.Cip30Service;
+import com.walruscode.cardano.services.EncryptionService;
 import com.walruscode.cardano.services.WalletService;
 
 import java.time.Instant;
@@ -17,11 +18,14 @@ public class App {
     private final Gson gson;
     private final Cip30Service cip30Service;
     private final WalletService walletService;
+    private final EncryptionService encryptionService;
 
-    public App(Gson gson, Cip30Service cip30Service, WalletService walletService) {
+    public App(Gson gson, Cip30Service cip30Service, WalletService walletService,
+               EncryptionService encryptionService) {
         this.gson = gson;
         this.cip30Service = cip30Service;
         this.walletService = walletService;
+        this.encryptionService = encryptionService;
     }
 
     public Map<String, Object> getAndSaveNonce(Map<String, Object> request) {
@@ -54,12 +58,11 @@ public class App {
         if (result.isEmpty()) return Map.of("statusCode",400);
 
         // verify address and nonce with database
-        var cipResult = result.get();
-
-        boolean isValid = walletService.isValid(cipResult.stakeAddress(), signPayload.get().stakeAddress(),
+        boolean isValid = walletService.isValid(result.get().stakeAddress(), signPayload.get().stakeAddress(),
                 "sadadada");
 
         // create cookie with data if 2 previous steps are correct
+        if (!isValid) return Map.of("statusCode",400);
 
         return Map.of("statusCode",200, "body","Signature validated, redirect to showContent",
                 "headers", Map.of("Set-Cookie", "the-cookie"));

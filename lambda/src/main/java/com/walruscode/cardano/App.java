@@ -1,6 +1,7 @@
 package com.walruscode.cardano;
 
 import com.google.gson.Gson;
+import com.walruscode.cardano.dto.Cookie;
 import com.walruscode.cardano.dto.Payload;
 import com.walruscode.cardano.dto.SignPayload;
 import com.walruscode.cardano.services.Cip30Service;
@@ -62,10 +63,16 @@ public class App {
                 "sadadada");
 
         if (!isValid) return Map.of("statusCode",400);
-        // create cookie with data if 2 previous steps are correct
 
-        return Map.of("statusCode",200, "body","Signature validated, redirect to showContent",
-                "headers", Map.of("Set-Cookie", "the-cookie"));
+        // create cookie with data if 2 previous steps are correct
+        try {
+            String cookie = encryptionService.encrypt(gson.toJson(new Cookie("sadadada", result.get().stakeAddress())));
+            return Map.of("statusCode",200, "body","Signature validated, redirect to showContent",
+                    "headers", Map.of("Set-Cookie", cookie));
+
+        } catch (Exception e) {
+            return Map.of("statusCode",500, "body", "Error code 5001");
+        }
     }
 
     public Map<String, Object> showContent(Map<String, Object> request) {

@@ -34,6 +34,8 @@ public class AppTest {
         Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result("key", "sign")))
                 .when(cip30Service).verify(anyString(), anyString());
         Mockito.doReturn(true).when(walletService).isValid(anyString(), anyString(), anyString());
+        Mockito.doReturn("encryptedCookie")
+                .when(encryptionService).encrypt(anyString());
 
         final App app = new App(new Gson(), cip30Service, walletService, encryptionService);
 
@@ -42,6 +44,23 @@ public class AppTest {
         Map<String, Object> response = app.validateSign(Map.of("body", body));
 
         Assertions.assertEquals(response.get("statusCode"), 200);
+    }
+
+    @Test
+    public void validateSignTestEncryptionFails() throws Exception {
+        Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result("key", "sign")))
+                .when(cip30Service).verify(anyString(), anyString());
+        Mockito.doReturn(true).when(walletService).isValid(anyString(), anyString(), anyString());
+        Mockito.doThrow(new RuntimeException("encryption failed"))
+                .when(encryptionService).encrypt(anyString());
+
+        final App app = new App(new Gson(), cip30Service, walletService, encryptionService);
+
+        String body = "{\"sign\": \"asdasdsd\", \"key\": \"assadad\", \"stakeAddress\": \"asadwqeqe1321\"}";
+
+        Map<String, Object> response = app.validateSign(Map.of("body", body));
+
+        Assertions.assertEquals(response.get("statusCode"), 500);
     }
 
     @Test

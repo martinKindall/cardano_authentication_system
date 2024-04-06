@@ -1,8 +1,8 @@
 package com.walruscode.cardano;
 
 import com.google.gson.Gson;
-import com.walruscode.cardano.repositories.WalletRepository;
 import com.walruscode.cardano.services.Cip30Service;
+import com.walruscode.cardano.services.WalletService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,12 +18,12 @@ import static org.mockito.ArgumentMatchers.anyString;
 public class AppTest {
 
     private Cip30Service cip30Service;
-    private WalletRepository walletRepository;
+    private WalletService walletService;
 
     @BeforeEach
     public void setup() {
         cip30Service = Mockito.mock(Cip30Service.class);
-        walletRepository = Mockito.mock(WalletRepository.class);
+        walletService = Mockito.mock(WalletService.class);
     }
 
     @Test
@@ -31,7 +31,7 @@ public class AppTest {
         Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result("key", "sign")))
                 .when(cip30Service).verify(anyString(), anyString());
 
-        final App app = new App(new Gson(), cip30Service, walletRepository);
+        final App app = new App(new Gson(), cip30Service, walletService);
 
         String body = "{\"sign\": \"asdasdsd\", \"key\": \"assadad\", \"stakeAddress\": \"asadwqeqe1321\"}";
 
@@ -42,7 +42,7 @@ public class AppTest {
 
     @Test
     public void validateSignTestBadRequest() {
-        final App app = new App(new Gson(), cip30Service, walletRepository);
+        final App app = new App(new Gson(), cip30Service, walletService);
 
         String body = "{\"sign\": \"asdasdsd\", \"key2\": \"assadad\", \"stakeAddress\": \"asadwqeqe1321\"}";
 
@@ -53,7 +53,7 @@ public class AppTest {
 
     @Test
     public void validateSignTestBadRequestv2() {
-        final App app = new App(new Gson(), cip30Service, walletRepository);
+        final App app = new App(new Gson(), cip30Service, walletService);
 
         String body = "notajsonstring";
 
@@ -66,7 +66,7 @@ public class AppTest {
     public void validateSignTestCip30Fails() throws Exception {
         Mockito.doThrow(new RuntimeException()).when(cip30Service).verify(anyString(), anyString());
 
-        final App app = new App(new Gson(), cip30Service, walletRepository);
+        final App app = new App(new Gson(), cip30Service, walletService);
 
         String body = "{\"sign\": \"asdasdsd\", \"key\": \"assadad\", \"stakeAddress\": \"asadwqeqe1321\"}";
 
@@ -80,7 +80,7 @@ public class AppTest {
         Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result("key", "sign")))
                 .when(cip30Service).verify(anyString(), anyString());
 
-        final App app = new App(new Gson(), cip30Service, walletRepository);
+        final App app = new App(new Gson(), cip30Service, walletService);
 
         String body = "{\"stakeAddress\": \"asadwqeqe1321\"}";
 
@@ -90,7 +90,7 @@ public class AppTest {
 
         ArgumentCaptor<String> address = ArgumentCaptor.captor();
 
-        Mockito.verify(walletRepository, Mockito.times(1))
+        Mockito.verify(walletService, Mockito.times(1))
                 .saveWallet(address.capture(), anyString(), any());
 
         Assertions.assertEquals(address.getValue(), "asadwqeqe1321");
@@ -101,7 +101,7 @@ public class AppTest {
         Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result("key", "sign")))
                 .when(cip30Service).verify(anyString(), anyString());
 
-        final App app = new App(new Gson(), cip30Service, walletRepository);
+        final App app = new App(new Gson(), cip30Service, walletService);
 
         String body = "{\"stakeAddress2\": \"asadwqeqe1321\"}";
 
@@ -109,7 +109,7 @@ public class AppTest {
 
         Assertions.assertEquals(response.get("statusCode"), 400);
 
-        Mockito.verify(walletRepository, Mockito.times(0))
+        Mockito.verify(walletService, Mockito.times(0))
                 .saveWallet(anyString(), anyString(), any());
     }
 
@@ -118,7 +118,7 @@ public class AppTest {
         Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result("key", "sign")))
                 .when(cip30Service).verify(anyString(), anyString());
 
-        final App app = new App(new Gson(), cip30Service, walletRepository);
+        final App app = new App(new Gson(), cip30Service, walletService);
 
         String body = "notajsonbody";
 
@@ -126,7 +126,7 @@ public class AppTest {
 
         Assertions.assertEquals(response.get("statusCode"), 400);
 
-        Mockito.verify(walletRepository, Mockito.times(0))
+        Mockito.verify(walletService, Mockito.times(0))
                 .saveWallet(anyString(), anyString(), any());
     }
 }

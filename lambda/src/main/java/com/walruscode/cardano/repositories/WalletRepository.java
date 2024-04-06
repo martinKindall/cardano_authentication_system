@@ -3,13 +3,16 @@ package com.walruscode.cardano.repositories;
 import com.walruscode.cardano.model.Wallet;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.PutItemEnhancedRequest;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.endpoints.internal.GetAttr;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.Optional;
 
 public class WalletRepository implements AutoCloseable {
 
@@ -41,6 +44,14 @@ public class WalletRepository implements AutoCloseable {
                 .build();
 
         table.putItem(request);
+    }
+
+    public Optional<Wallet> find(String stakeAddress) {
+        Wallet wallet = table.getItem(Key.builder().partitionValue(stakeAddress).build());
+
+        if (wallet == null) return Optional.empty();
+
+        return Optional.of(wallet);
     }
 
     @Override

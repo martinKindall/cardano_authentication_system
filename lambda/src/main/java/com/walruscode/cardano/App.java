@@ -3,8 +3,8 @@ package com.walruscode.cardano;
 import com.google.gson.Gson;
 import com.walruscode.cardano.dto.Payload;
 import com.walruscode.cardano.dto.SignPayload;
-import com.walruscode.cardano.repositories.WalletRepository;
 import com.walruscode.cardano.services.Cip30Service;
+import com.walruscode.cardano.services.WalletService;
 
 import java.time.Instant;
 import java.util.List;
@@ -16,12 +16,12 @@ public class App {
 
     private final Gson gson;
     private final Cip30Service cip30Service;
-    private final WalletRepository walletRepository;
+    private final WalletService walletService;
 
-    public App(Gson gson, Cip30Service cip30Service, WalletRepository walletRepository) {
+    public App(Gson gson, Cip30Service cip30Service, WalletService walletService) {
         this.gson = gson;
         this.cip30Service = cip30Service;
-        this.walletRepository = walletRepository;
+        this.walletService = walletService;
     }
 
     public Map<String, Object> getAndSaveNonce(Map<String, Object> request) {
@@ -33,7 +33,7 @@ public class App {
 
         String nonce = generateRandomString();
 
-        walletRepository.saveWallet(payload.get().stakeAddress(), nonce, Instant.now());
+        walletService.saveWallet(payload.get().stakeAddress(), nonce, Instant.now());
 
         return Map.of("statusCode",200, "body","Needs SignData: " + nonce);
     }
@@ -54,6 +54,10 @@ public class App {
         if (result.isEmpty()) return Map.of("statusCode",400);
 
         // verify address and nonce with database
+        var cipResult = result.get();
+
+        boolean isValid = walletService.isValid(cipResult.stakeAddress(), signPayload.get().stakeAddress(),
+                "sadadada");
 
         // create cookie with data if 2 previous steps are correct
 

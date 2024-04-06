@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
+import java.util.HexFormat;
 
 public class EncryptionService {
     private final SecureRandom secureRandom = new SecureRandom();
@@ -20,7 +21,7 @@ public class EncryptionService {
         associatedData = "ProtocolVersion1".getBytes(StandardCharsets.UTF_8);
     }
 
-    public byte[] encrypt(String plaintext) throws Exception {
+    public String encrypt(String plaintext) throws Exception {
 
         byte[] iv = new byte[GCM_IV_LENGTH];
         secureRandom.nextBytes(iv);
@@ -37,10 +38,14 @@ public class EncryptionService {
         ByteBuffer byteBuffer = ByteBuffer.allocate(iv.length + cipherText.length);
         byteBuffer.put(iv);
         byteBuffer.put(cipherText);
-        return byteBuffer.array();
+        return encodeUsingHexFormat(byteBuffer.array());
     }
 
-    public String decrypt(byte[] cipherMessage) throws Exception {
+    public String decrypt(String cipherMessage) throws Exception {
+        return decryptHex(decodeUsingHexFormat(cipherMessage));
+    }
+
+    private String decryptHex(byte[] cipherMessage) throws Exception {
         final Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
 
         AlgorithmParameterSpec gcmIv = new GCMParameterSpec(128, cipherMessage, 0, GCM_IV_LENGTH);
@@ -52,5 +57,15 @@ public class EncryptionService {
         byte[] plainText = cipher.doFinal(cipherMessage, GCM_IV_LENGTH, cipherMessage.length - GCM_IV_LENGTH);
 
         return new String(plainText, StandardCharsets.UTF_8);
+    }
+
+    private String encodeUsingHexFormat(byte[] bytes) {
+        HexFormat hexFormat = HexFormat.of();
+        return hexFormat.formatHex(bytes);
+    }
+
+    private byte[] decodeUsingHexFormat(String hexString) {
+        HexFormat hexFormat = HexFormat.of();
+        return hexFormat.parseHex(hexString);
     }
 }

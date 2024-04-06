@@ -61,8 +61,8 @@ public class App {
         boolean isValid = walletService.isValid(result.get().stakeAddress(), signPayload.get().stakeAddress(),
                 "sadadada");
 
-        // create cookie with data if 2 previous steps are correct
         if (!isValid) return Map.of("statusCode",400);
+        // create cookie with data if 2 previous steps are correct
 
         return Map.of("statusCode",200, "body","Signature validated, redirect to showContent",
                 "headers", Map.of("Set-Cookie", "the-cookie"));

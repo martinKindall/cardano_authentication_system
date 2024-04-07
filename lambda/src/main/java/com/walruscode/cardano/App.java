@@ -9,10 +9,9 @@ import com.walruscode.cardano.services.EncryptionService;
 import com.walruscode.cardano.services.WalletService;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
+
+import static com.walruscode.cardano.Utils.Utils.generateRandomString;
 
 public class App {
 
@@ -40,7 +39,9 @@ public class App {
 
         walletService.saveWallet(payload.get().stakeAddress(), nonce, Instant.now());
 
-        return Map.of("statusCode",200, "body","Needs SignData: " + nonce);
+        return Map.of("statusCode",200, "body", Map.of("message", new Cookie(
+                nonce, payload.get().stakeAddress()
+        )));
     }
 
     public Map<String, Object> validateSign(Map<String, Object> request) {
@@ -58,15 +59,17 @@ public class App {
 
         if (result.isEmpty()) return Map.of("statusCode",400);
 
+        Cookie message = gson.fromJson(result.get().message(), Cookie.class);
+
         // verify address and nonce with database
         boolean isValid = walletService.isValid(result.get().stakeAddress(), signPayload.get().stakeAddress(),
-                "sadadada");
+                message.nonce());
 
         if (!isValid) return Map.of("statusCode",400);
 
-        // create cookie with data if 2 previous steps are correct
         try {
-            String cookie = encryptionService.encrypt(gson.toJson(new Cookie("sadadada", result.get().stakeAddress())));
+            String cookie = encryptionService.encrypt(gson.toJson(message));
+
             return Map.of("statusCode",200, "body","Signature validated, redirect to showContent",
                     "headers", Map.of("Set-Cookie", cookie));
 
@@ -101,11 +104,19 @@ public class App {
         return new PayloadCookie(payload, validateCookie(cookie.get(), payload.get().stakeAddress()));
     }
 
-    private Optional<String> validateCookie(String encryptedCookie, String stakeAddress) {
-        return Optional.of(encryptedCookie);
-    }
+    private Optional<String> validateCookie(String encryptedCookie, String payloadStakeAddress) {
 
-    private void saveNonceAndAddress(String stakeAddress, String somerandomnonce) {}
+        try {
+            String decryptedCookie = encryptionService.decrypt(encryptedCookie);
+            Cookie cookie = gson.fromJson(decryptedCookie, Cookie.class);
+
+            return Objects.equals(cookie.stakeAddress(), payloadStakeAddress) ? Optional.of(decryptedCookie) :
+                    Optional.empty();
+
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
 
     private Optional<Payload> getPayloadParams(Map<String, Object> request) {
         String body = (String) request.get("body");
@@ -140,17 +151,4 @@ public class App {
     }
 
     private record PayloadCookie(Optional<Payload> payload, Optional<String> cookie) {}
-
-    private static String generateRandomString() {
-        int leftLimit = 48;   // numeral '0'
-        int rightLimit = 122; // letter 'z'
-        int targetStringLength = 10;
-        Random random = new Random();
-
-        return random.ints(leftLimit, rightLimit + 1)
-                .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
-                .limit(targetStringLength)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
-    }
 }

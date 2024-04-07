@@ -31,7 +31,9 @@ public class AppTest {
 
     @Test
     public void validateSignTest() throws Exception {
-        Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result("key", "sign")))
+        Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result(
+                        "{\"nonce\": \"asdasdsd\", \"stakeAddress\": \"asadwqeqe1321\"}",
+                        "sign")))
                 .when(cip30Service).verify(anyString(), anyString());
         Mockito.doReturn(true).when(walletService).isValid(anyString(), anyString(), anyString());
         Mockito.doReturn("encryptedCookie")
@@ -48,7 +50,9 @@ public class AppTest {
 
     @Test
     public void validateSignTestEncryptionFails() throws Exception {
-        Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result("key", "sign")))
+        Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result(
+                        "{\"nonce\": \"asdasdsd\", \"stakeAddress\": \"asadwqeqe1321\"}",
+                        "sign")))
                 .when(cip30Service).verify(anyString(), anyString());
         Mockito.doReturn(true).when(walletService).isValid(anyString(), anyString(), anyString());
         Mockito.doThrow(new RuntimeException("encryption failed"))
@@ -65,7 +69,9 @@ public class AppTest {
 
     @Test
     public void validateSignTestNotValidWallet() throws Exception {
-        Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result("key", "sign")))
+        Mockito.doReturn(Optional.of(new Cip30Service.Cip30Result(
+                "{\"nonce\": \"asdasdsd\", \"stakeAddress\": \"asadwqeqe1321\"}",
+                        "sign")))
                 .when(cip30Service).verify(anyString(), anyString());
         Mockito.doReturn(false).when(walletService).isValid(anyString(), anyString(), anyString());
 

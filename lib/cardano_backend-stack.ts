@@ -1,3 +1,7 @@
+import * as dotenv from "dotenv";
+import path = require("path");
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
 import {Duration, Stack, StackProps} from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
@@ -5,6 +9,7 @@ import * as apigatewayv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import {HttpLambdaIntegration} from 'aws-cdk-lib/aws-apigatewayv2-integrations'
 import {PayloadFormatVersion} from "aws-cdk-lib/aws-apigatewayv2";
+
 
 export class CardanoBackendStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -26,7 +31,8 @@ export class CardanoBackendStack extends Stack {
       memorySize: 1024,
       timeout: Duration.seconds(10),
       environment: {
-        TABLE_NAME: table.tableName
+        TABLE_NAME: table.tableName,
+        SECRET_KEY: process.env.SECRET_KEY!
       }
     });
 
@@ -37,7 +43,8 @@ export class CardanoBackendStack extends Stack {
       memorySize: 1024,
       timeout: Duration.seconds(10),
       environment: {
-        TABLE_NAME: table.tableName
+        TABLE_NAME: table.tableName,
+        SECRET_KEY: process.env.SECRET_KEY!
       }
     });
 
@@ -46,7 +53,10 @@ export class CardanoBackendStack extends Stack {
       code: lambda.Code.fromAsset("./lambda/target/app.jar"),
       handler: "com.walruscode.cardano.Router::showContent",
       memorySize: 1024,
-      timeout: Duration.seconds(10)
+      timeout: Duration.seconds(10),
+      environment: {
+        SECRET_KEY: process.env.SECRET_KEY!
+      }
     });
 
     const httpApi = new apigatewayv2.HttpApi(this, 'CardanoApi');

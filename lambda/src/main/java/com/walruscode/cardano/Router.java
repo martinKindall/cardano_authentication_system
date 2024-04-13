@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class Router {
     private static final App app = new App(new Gson(), new Cip30Service(), new WalletService(new WalletRepository()),
-            new EncryptionService(new byte[] {}));
+            new EncryptionService(System.getenv("SECRET_KEY")));
 
     public Map<String, Object> login(Map<String, Object> request) {
         return app.getAndSaveNonce(request);

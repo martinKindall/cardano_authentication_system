@@ -16,8 +16,8 @@ public class EncryptionService {
     private final SecretKey secretKey;
     private final byte[] associatedData;
 
-    public EncryptionService(byte[] key) {
-        secretKey = new SecretKeySpec(key, "AES");
+    public EncryptionService(String keyHex) {
+        secretKey = new SecretKeySpec(decodeUsingHexFormat(keyHex), "AES");
         associatedData = "ProtocolVersion1".getBytes(StandardCharsets.UTF_8);
     }
 
@@ -59,12 +59,12 @@ public class EncryptionService {
         return new String(plainText, StandardCharsets.UTF_8);
     }
 
-    private String encodeUsingHexFormat(byte[] bytes) {
+    public static String encodeUsingHexFormat(byte[] bytes) {
         HexFormat hexFormat = HexFormat.of();
         return hexFormat.formatHex(bytes);
     }
 
-    private byte[] decodeUsingHexFormat(String hexString) {
+    private static byte[] decodeUsingHexFormat(String hexString) {
         HexFormat hexFormat = HexFormat.of();
         return hexFormat.parseHex(hexString);
     }

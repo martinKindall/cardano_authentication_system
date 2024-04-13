@@ -17,7 +17,7 @@ public class EncryptionTest {
         byte[] key = new byte[16];
         secureRandom.nextBytes(key);
 
-        EncryptionService encryptionService = new EncryptionService(key);
+        EncryptionService encryptionService = new EncryptionService(EncryptionService.encodeUsingHexFormat(key));
 
         String message = "the secret message: " + generateRandomString();
         String cipherText = encryptionService.encrypt(message);

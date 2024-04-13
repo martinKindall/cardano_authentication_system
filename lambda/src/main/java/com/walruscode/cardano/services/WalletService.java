@@ -23,7 +23,7 @@ public class WalletService {
 
         if (wallet.isEmpty()) return false;
 
-        return !wallet.get().nonce().equals(messageNonce);
+        return !wallet.get().getNonce().equals(messageNonce);
     }
 
     public void saveWallet(String stakeAddress, String nonce, Instant instant) {

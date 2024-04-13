@@ -39,9 +39,9 @@ public class App {
 
         walletService.saveWallet(payload.get().stakeAddress(), nonce, Instant.now());
 
-        return Map.of("statusCode",200, "body", Map.of("message", new Cookie(
-                nonce, payload.get().stakeAddress()
-        )));
+        String body = gson.toJson(Map.of("message", new Cookie(nonce, payload.get().stakeAddress())));
+
+        return Map.of("statusCode",200, "body", body);
     }
 
     public Map<String, Object> validateSign(Map<String, Object> request) {

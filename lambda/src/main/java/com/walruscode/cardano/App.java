@@ -32,7 +32,7 @@ public class App {
         Optional<Payload> payload = getPayloadParams(request);
 
         if (payload.isEmpty()) {
-            return Map.of("statusCode",400);
+            return getResponse(400, "");
         }
 
         String nonce = generateRandomString();
@@ -41,13 +41,13 @@ public class App {
 
         String body = gson.toJson(Map.of("message", new Cookie(nonce, payload.get().stakeAddress())));
 
-        return Map.of("statusCode",200, "body", body);
+        return getResponse(200, body);
     }
 
     public Map<String, Object> validateSign(Map<String, Object> request) {
         Optional<SignPayload> signPayload = getSignPayloadParams(request);
 
-        if (signPayload.isEmpty()) return Map.of("statusCode",400);
+        if (signPayload.isEmpty()) return getResponse(400, "");
 
         Optional<Cip30Service.Cip30Result> result;
 
@@ -57,7 +57,7 @@ public class App {
             result = Optional.empty();
         }
 
-        if (result.isEmpty()) return Map.of("statusCode",400);
+        if (result.isEmpty()) return getResponse(400, "");
 
         Cookie message = gson.fromJson(result.get().message(), Cookie.class);
 
@@ -65,16 +65,15 @@ public class App {
         boolean isValid = walletService.isValid(result.get().stakeAddress(), signPayload.get().stakeAddress(),
                 message.nonce());
 
-        if (!isValid) return Map.of("statusCode",400);
+        if (!isValid) return getResponse(400, "");
 
         try {
             String cookie = encryptionService.encrypt(gson.toJson(message));
 
-            return Map.of("statusCode",200, "body","Signature validated, redirect to showContent",
-                    "headers", Map.of("Set-Cookie", cookie));
+            return getResponse(200, "Signature validated, redirect to showContent", cookie);
 
         } catch (Exception e) {
-            return Map.of("statusCode",500, "body", "Error code 5001");
+            return getResponse(500, "Error code 5001");
         }
     }
 
@@ -82,14 +81,14 @@ public class App {
         PayloadCookie payloadCookie = getDecryptedCookie(request);
 
         if (payloadCookie.payload().isEmpty()) {
-            return Map.of("statusCode",400);
+            return getResponse(400, "");
         }
 
         if (payloadCookie.cookie().isEmpty()) {
-            return Map.of("statusCode",200, "body","Redirect to login and clear cookie");
+            return getResponse(200, "Redirect to login and clear cookie");
         }
 
-        return Map.of("statusCode",200,"body","Foo bar");
+        return getResponse(200, "Foo bar");
     }
 
     private PayloadCookie getDecryptedCookie(Map<String, Object> request) {
@@ -148,6 +147,24 @@ public class App {
         if (cookies == null || cookies.isEmpty()) return Optional.empty();
 
         return Optional.of(cookies.getFirst());
+    }
+
+    private Map<String, Object> getResponse(int status, String body) {
+        Map<String, Object> response = new HashMap<>(Map.of("statusCode", status, "body", body));
+        Map<String, Object> headers = new HashMap<>(Map.of("Access-Control-Allow-Origin", "*"));
+
+        response.put("headers", headers);
+
+        return response;
+    }
+
+    private Map<String, Object> getResponse(int status, String body, String cookie) {
+        Map<String, Object> response = getResponse(status, body);
+        Map<String, Object> headers = (Map<String, Object>) response.get("headers");
+
+        headers.put("Set-Cookie", cookie);
+
+        return response;
     }
 
     private record PayloadCookie(Optional<Payload> payload, Optional<String> cookie) {}

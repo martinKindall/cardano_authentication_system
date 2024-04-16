@@ -11,6 +11,7 @@ import com.walruscode.cardano.services.WalletService;
 import java.time.Instant;
 import java.util.*;
 
+import static com.walruscode.cardano.Utils.RouterUtils.getResponse;
 import static com.walruscode.cardano.Utils.Utils.generateRandomString;
 
 public class App {
@@ -147,24 +148,6 @@ public class App {
         if (cookies == null || cookies.isEmpty()) return Optional.empty();
 
         return Optional.of(cookies.getFirst());
-    }
-
-    private Map<String, Object> getResponse(int status, String body) {
-        Map<String, Object> response = new HashMap<>(Map.of("statusCode", status, "body", body));
-        Map<String, Object> headers = new HashMap<>(Map.of("Access-Control-Allow-Origin", "*"));
-
-        response.put("headers", headers);
-
-        return response;
-    }
-
-    private Map<String, Object> getResponse(int status, String body, String cookie) {
-        Map<String, Object> response = getResponse(status, body);
-        Map<String, Object> headers = (Map<String, Object>) response.get("headers");
-
-        headers.put("Set-Cookie", cookie);
-
-        return response;
     }
 
     private record PayloadCookie(Optional<Payload> payload, Optional<String> cookie) {}

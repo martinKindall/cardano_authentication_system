@@ -81,19 +81,19 @@ export class CardanoBackendStack extends Stack {
 
     httpApi.addRoutes({
       path: '/login',
-      methods: [ apigatewayv2.HttpMethod.POST ],
+      methods: [ apigatewayv2.HttpMethod.POST, apigatewayv2.HttpMethod.OPTIONS ],
       integration: lambdaLoginIntegration,
     });
 
     httpApi.addRoutes({
       path: '/validate',
-      methods: [ apigatewayv2.HttpMethod.POST ],
+      methods: [ apigatewayv2.HttpMethod.POST, apigatewayv2.HttpMethod.OPTIONS ],
       integration: lambdaValidationIntegration,
     });
 
     httpApi.addRoutes({
       path: '/home',
-      methods: [ apigatewayv2.HttpMethod.GET ],
+      methods: [ apigatewayv2.HttpMethod.GET, apigatewayv2.HttpMethod.OPTIONS ],
       integration: lambdaShowContentIntegration,
     });
 
